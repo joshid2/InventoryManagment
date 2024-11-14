@@ -5,70 +5,63 @@ import com.highprofitrecipes.recipe_project.model.Ingredients;
 import com.highprofitrecipes.recipe_project.model.Item;
 import com.highprofitrecipes.recipe_project.model.Recipes;
 import com.opencsv.CSVReader;
-import org.springframework.stereotype.Component;
-import java.io.FileReader;
+import com.opencsv.exceptions.CsvException;
 import java.io.IOException;
-import java.util.Collections;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /*
 This Util class will help us to read the data from the provided CSV files
 Item.csv,Ingredients.csv,Recipe.csv.
  */
-@Component
-public class UtilReadCSV {
+public final class UtilReadCSV {
+
+    /*
+    The below method helps to get CSV files from the resource section of code repo
+    and it will return the data in array of strings
+    */
+    private static List<String[]> getCSVFiles(String csvName) throws IOException, CsvException {
+
+        try(CSVReader csvReader=new CSVReader(new InputStreamReader
+                (Objects.requireNonNull(UtilReadCSV.class.getClassLoader().getResourceAsStream(csvName))))){
+            //Skip->Skips the header row and collects the processed data into list
+
+            return csvReader.readAll().stream().skip(1).collect(Collectors.toList());
+        }
+    }
 
     // This methods helps to get the data from ingredients.csv and maps it to list of ingredients objects
-    public List<Ingredients> getIngredientScan(){
+    public static  List<Ingredients> getIngredientScan()throws IOException , CsvException{
 
-
-        try(CSVReader csvReader =new CSVReader(new FileReader("ingredients.csv"))){
-            //Read data from CSV file
-            List<String[]> ingredientsFileData =csvReader.readAll();
-            //Skip->Skips the header row and collects the processed data into list
-            return ingredientsFileData.stream().skip(1).map(data->new Ingredients(data[0],data[1],data[2],
+            return getCSVFiles("ingredients.csv").stream().map(data->new Ingredients(data[0],data[1],data[2],
                     Integer.parseInt(data[3]))).collect(Collectors.toList());
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        //return an empty collection in case of exception or no data founds
-        return Collections.emptyList();
-
     }
 
-    // This methods helps to get the data from ingredients.csv and maps it to list of ingredients objects
-    public List<Item> getItemScan(){
+    // This methods helps to get the data from items.csv and maps it to list of ingredients objects
+    public static List<Item> getItemScan()throws IOException , CsvException{
 
-        try(CSVReader csvReader=new CSVReader(new FileReader("items.csv"))){
-            //Read data from CSV file
-            List<String[]> itemsFileData =csvReader.readAll();
-            //Skip->Skips the header row and collects the processed data into list
-            return itemsFileData.stream().skip(1).map(data->new Item(data[0],data[1],Double.parseDouble(data[2])))
+        return getCSVFiles("items.csv").stream().map(data->new Item(data[0],data[1],convertStringToDouble(data[2])))
                     .collect(Collectors.toList());
-
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        //return an empty collection in case of exception or no data founds
-        return Collections.emptyList();
-
     }
 
-    // This methods helps to get the data from ingredients.csv and maps it to list of ingredients objects
-    public List<Recipes> getRecipesScan(){
+    // This methods helps to get the data from recipes.csv and maps it to list of ingredients objects
+    public static List<Recipes> getRecipesScan() throws IOException , CsvException{
 
-        try(CSVReader csvReader=new CSVReader(new FileReader("recipes.csv"))){
-            //Read data from CSV file
-            List<String[]> recipesFileData=csvReader.readAll();
-            //Skip->Skips the header row and collects the processed data into list
-            return recipesFileData.stream().skip(1).map(data->new Recipes(data[0],data[1],Double.parseDouble(data[2])))
+        List<String[]> arrayString=getCSVFiles("recipes.csv");
+
+            return arrayString.stream().map(data->new Recipes(data[0],data[1],convertStringToDouble(data[2])))
                     .collect(Collectors.toList());
-        }catch (IOException e){
-            e.printStackTrace();
+    }
+
+    //This helper method check if the value is empty , replace with 0.0
+    public static double convertStringToDouble(String input){
+
+        if(input.length()>0){
+            return Double.parseDouble(input);
         }
-        //return an empty collection in case of exception or no data founds
-        return Collections.emptyList();
+        return 0.0;
 
     }
 
