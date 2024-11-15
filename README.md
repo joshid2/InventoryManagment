@@ -159,7 +159,7 @@ Request Type: GET
 
 **Future Enhancement**
 ```
-DataBase Integartion: Instead of CSV file,integrate a databse for larger dynamic data handling.
+DataBase Integartion: Instead of CSV file,integrate a database for larger dynamic data handling.
 
 Testing : Add Unit test to validate service logic and ensure accurate profit calculation.
 ```
